@@ -1,0 +1,71 @@
+# 평일 09:50 KST: 이번 주 Milestone의 남은 이슈, 마감까지 남은 날, 지난 24시간 푸시 여부를
+# "📅 진행 로그" 이슈에 댓글로 남기고 저장소 주인을 멘션한다 (GitHub 앱 푸시 알림으로 받기).
+name: Daily check
+
+on:
+  schedule:
+    - cron: "50 0 * * 1-5"   # UTC 00:50 = KST 09:50, 월~금
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Post daily status
+        run: |
+          set -euo pipefail
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          weekday=$(TZ=Asia/Seoul date +%u)   # 1=월 ... 5=금
+
+          log=$(gh issue list --repo "$REPO" --label daily-log --state open --json number --jq '.[0].number // empty')
+          if [ -z "$log" ]; then echo "진행 로그 이슈가 없습니다. Roadmap setup을 먼저 실행하세요."; exit 0; fi
+
+          # 이번 주 Milestone = 마감이 아직 안 지난 것 중 가장 가까운 것
+          ms=$(gh api "repos/$REPO/milestones?state=open&sort=due_on&direction=asc&per_page=100" \
+               | jq -c --arg now "$now" '[.[] | select(.due_on != null and .due_on >= $now)][0]')
+          if [ "$ms" = "null" ]; then echo "진행 중인 Milestone 없음"; exit 0; fi
+
+          title=$(jq -r '.title' <<<"$ms")
+          due=$(jq -r '.due_on' <<<"$ms")
+          open=$(jq -r '.open_issues' <<<"$ms")
+          closed=$(jq -r '.closed_issues' <<<"$ms")
+          total=$((open + closed))
+          days_left=$(( ( $(date -d "$due" +%s) - $(date +%s) ) / 86400 ))
+
+          # 모든 브랜치의 푸시를 센다 (Events API)
+          pushes=$(gh api "repos/$REPO/events?per_page=100" \
+                   | jq --arg since "$since" '[.[] | select(.type=="PushEvent" and .created_at >= $since)] | length')
+
+          if [ "$weekday" = "1" ]; then
+            push_line="월요일이라 푸시 점검은 건너뜀"
+          elif [ "$pushes" = "0" ]; then
+            push_line="⚠️ **지난 24시간 푸시 0회.** 오늘 10시 블록에서 반드시 커밋을 남기세요."
+          else
+            push_line="✅ 지난 24시간 푸시 ${pushes}회"
+          fi
+
+          list=$(gh issue list --repo "$REPO" --milestone "$title" --state open --json number,title \
+                 --jq '.[] | "- [ ] #\(.number) \(.title)"')
+          [ -z "$list" ] && list="- 🎉 이번 주 이슈 전부 완료"
+
+          body=$(cat <<EOF
+          @${OWNER} **$(TZ=Asia/Seoul date +'%m/%d (%a)') 아침 점검**
+
+          **${title}** · ${closed}/${total} 완료 · 마감까지 ${days_left}일
+
+          ${push_line}
+
+          남은 이슈:
+          ${list}
+          EOF
+          )
+          gh issue comment "$log" --repo "$REPO" --body "$body"

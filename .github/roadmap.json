@@ -1,0 +1,88 @@
+{
+  "buffer_milestone": "W8 · 버퍼 + 면접 대비",
+  "milestones": [
+    {
+      "title": "W1 · 앱 v1 + 테스트",
+      "due": "2026-10-09",
+      "issues": [
+        { "title": "앱 v1 완성 (검색 → 상세 → 워치리스트, 평소 MVVM 방식)", "body": "ViewModel 안에서 네트워크 서비스를 직접 생성한다. 코드는 전부 설명할 수 있어야 한다." },
+        { "title": "Swift Testing 순수 로직 테스트 10개 이상", "body": "평점·날짜 포맷, 정렬, DTO 디코딩. 파라미터화 테스트 1개 이상 포함." },
+        { "title": "ViewModel 테스트 시도 후 막힌 지점을 README에 기록", "body": "완료 기준: '이 ViewModel은 왜 테스트하기 어려운가'를 내 말로 설명한다." },
+        { "title": "Mock / Stub / Fake 차이 정리", "body": "" },
+        { "title": "태그 v1-mvvm", "body": "" }
+      ]
+    },
+    {
+      "title": "W2 · 클린 아키텍처",
+      "due": "2026-10-16",
+      "issues": [
+        { "title": "네트워크 서비스 protocol 추상화 + init 주입", "body": "" },
+        { "title": "Fake로 ViewModel 테스트 (성공 / 실패 / 빈 결과)", "body": "" },
+        { "title": "DTO ↔ Entity 분리, 워치리스트에 Repository·UseCase 적용", "body": "기능 하나에만 적용한다. 앱 전체를 바꾸지 않는다." },
+        { "title": "글: 작은 앱에서 클린 아키텍처는 어디까지", "body": "면접 답변용." },
+        { "title": "태그 v2-clean", "body": "" }
+      ]
+    },
+    {
+      "title": "W3 · TCA ①",
+      "due": "2026-10-23",
+      "issues": [
+        { "title": "TCA 버전 고정 + 공식 튜토리얼 완주", "body": "Meet the Composable Architecture. 고정한 버전을 로드맵 5장 튜터 프롬프트에 적는다." },
+        { "title": "워치리스트 기능 TCA 이식 (@Dependency)", "body": "W2의 protocol 주입이 @Dependency로 어떻게 바뀌는지 PR 설명에 적는다." },
+        { "title": "TestStore 테스트 3개 이상", "body": "" }
+      ]
+    },
+    {
+      "title": "W4 · TCA ② + Tuist",
+      "due": "2026-10-30",
+      "issues": [
+        { "title": "StackState 네비게이션 + 전체 화면 TCA 전환", "body": "" },
+        { "title": "Tuist 모듈 분리 (App / Feature×3 / Core)", "body": "완료 기준: tuist generate 한 번으로 빌드된다." },
+        { "title": "README: MVVM vs 클린 vs TCA 비교표", "body": "코드량, 테스트 난이도, 흐름 추적." },
+        { "title": "태그 v3-tca", "body": "" },
+        { "title": "이력서 · 포트폴리오 초안 (주말)", "body": "다음 주부터 지원 시작." }
+      ]
+    },
+    {
+      "title": "W5 · UIKit",
+      "due": "2026-11-06",
+      "issues": [
+        { "title": "생명주기 · 코드 Auto Layout · UINavigationController", "body": "" },
+        { "title": "Representable / UIHostingController 양방향 연동", "body": "" },
+        { "title": "검색 목록 UIKit 버전 (Compositional Layout + Diffable)", "body": "밀리면 가장 먼저 줄이는 항목: Compositional 대신 기본 Flow Layout 허용." },
+        { "title": "지원 3곳", "body": "회사명 / 공고 링크 / 요구 아키텍처를 댓글로 남긴다." }
+      ]
+    },
+    {
+      "title": "W6 · RxSwift + ReactorKit",
+      "due": "2026-11-13",
+      "issues": [
+        { "title": "RxSwift 핵심 연산자 · UI 바인딩", "body": "" },
+        { "title": "UIKit 목록 화면 ReactorKit 바인딩", "body": "밀리면: 직접 구현 대신 ReactorKit Examples 코드 읽기로 대체." },
+        { "title": "RIBs 튜토리얼 1 개념 정리", "body": "" },
+        { "title": "태그 v4-uikit-reactorkit", "body": "" },
+        { "title": "지원 3곳", "body": "" }
+      ]
+    },
+    {
+      "title": "W7 · Fastlane + CI + Sentry",
+      "due": "2026-11-20",
+      "issues": [
+        { "title": "Fastlane match + beta lane → TestFlight", "body": "완료 기준: fastlane beta 한 줄로 업로드." },
+        { "title": "PR 자동 테스트 CI (ci.yml)", "body": "" },
+        { "title": "Sentry 연동 + 테스트 크래시 확인", "body": "" },
+        { "title": "velog 글 2편", "body": "① 테스트가 아키텍처를 바꾼 이유 ② MVVM vs TCA vs ReactorKit" },
+        { "title": "지원 3곳", "body": "" }
+      ]
+    },
+    {
+      "title": "W8 · 버퍼 + 면접 대비",
+      "due": "2026-11-27",
+      "issues": [
+        { "title": "면접 답변 정리", "body": "아키텍처 비교, 테스트 전략, 메모리 관리, Swift Concurrency, SwiftUI 상태 관리." },
+        { "title": "README 최종 + 이력서 기술 스택 갱신", "body": "" },
+        { "title": "지원 3곳", "body": "" }
+      ]
+    }
+  ]
+}

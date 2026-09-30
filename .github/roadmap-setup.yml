@@ -1,0 +1,56 @@
+# 한 번만 실행: roadmap.json을 읽어 라벨, Milestone, Issue, 진행 로그 이슈를 만든다.
+# Actions 탭 → "Roadmap setup" → Run workflow
+# 이미 있는 Milestone은 건너뛰므로 다시 실행해도 중복 생성되지 않는다.
+name: Roadmap setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create labels
+        run: |
+          gh label create study        --color 0E8A16 --description "학습 과제"        --force --repo "$REPO"
+          gh label create carried-over --color D93F0B --description "지난주에서 이월됨" --force --repo "$REPO"
+          gh label create daily-log    --color 5319E7 --description "진행 로그"        --force --repo "$REPO"
+
+      - name: Create milestones and issues
+        run: |
+          existing=$(gh api "repos/$REPO/milestones?state=all&per_page=100" --jq '.[].title')
+          jq -c '.milestones[]' .github/roadmap.json | while read -r m; do
+            title=$(jq -r '.title' <<<"$m")
+            due=$(jq -r '.due' <<<"$m")
+            if grep -Fxq "$title" <<<"$existing"; then
+              echo "skip (exists): $title"
+              continue
+            fi
+            # 마감: 해당 날짜 23:59:59 KST = 같은 날 14:59:59 UTC
+            gh api "repos/$REPO/milestones" -f title="$title" -f due_on="${due}T14:59:59Z" >/dev/null
+            echo "milestone: $title"
+            jq -c '.issues[]' <<<"$m" | while read -r i; do
+              gh issue create --repo "$REPO" \
+                --title "$(jq -r '.title' <<<"$i")" \
+                --body  "$(jq -r '.body // ""' <<<"$i")" \
+                --milestone "$title" \
+                --label study >/dev/null
+            done
+          done
+
+      - name: Create progress log issue
+        run: |
+          count=$(gh issue list --repo "$REPO" --label daily-log --state open --json number --jq 'length')
+          if [ "$count" = "0" ]; then
+            gh issue create --repo "$REPO" --title "📅 진행 로그" --label daily-log \
+              --body "평일 아침 점검과 주간 리포트가 이 이슈에 댓글로 쌓인다. 닫지 말 것."
+          fi

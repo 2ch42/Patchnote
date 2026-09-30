@@ -1,0 +1,75 @@
+# 토요일 00:30 KST: 방금 마감된 주의 달성률을 리포트하고,
+# 못 닫은 이슈는 버퍼 Milestone으로 옮겨 carried-over 라벨을 붙인 뒤 해당 Milestone을 닫는다.
+name: Weekly review
+
+on:
+  schedule:
+    - cron: "30 15 * * 5"   # UTC 금 15:30 = KST 토 00:30
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Review finished week
+        run: |
+          set -euo pipefail
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          buffer=$(jq -r '.buffer_milestone' .github/roadmap.json)
+
+          log=$(gh issue list --repo "$REPO" --label daily-log --state open --json number --jq '.[0].number // empty')
+          if [ -z "$log" ]; then echo "진행 로그 이슈 없음"; exit 0; fi
+
+          # 방금 마감된 주 = 마감이 지났는데 아직 열려 있는 Milestone 중 가장 최근 것
+          ms=$(gh api "repos/$REPO/milestones?state=open&sort=due_on&direction=desc&per_page=100" \
+               | jq -c --arg now "$now" '[.[] | select(.due_on != null and .due_on < $now)][0]')
+          if [ "$ms" = "null" ]; then echo "리뷰할 Milestone 없음"; exit 0; fi
+
+          title=$(jq -r '.title' <<<"$ms")
+          num=$(jq -r '.number' <<<"$ms")
+          open=$(jq -r '.open_issues' <<<"$ms")
+          closed=$(jq -r '.closed_issues' <<<"$ms")
+          total=$((open + closed))
+          pct=$(( total > 0 ? closed * 100 / total : 0 ))
+
+          filled=$(( pct / 10 )); bar=""
+          for i in $(seq 1 10); do [ "$i" -le "$filled" ] && bar="${bar}■" || bar="${bar}□"; done
+
+          carried=$(gh issue list --repo "$REPO" --milestone "$title" --state open --json number,title \
+                    --jq '.[] | "- #\(.number) \(.title)"')
+
+          if [ "$open" -gt 0 ] && [ "$title" != "$buffer" ]; then
+            for n in $(gh issue list --repo "$REPO" --milestone "$title" --state open --json number --jq '.[].number'); do
+              gh issue edit "$n" --repo "$REPO" --milestone "$buffer" --add-label carried-over >/dev/null
+            done
+            carry_line="못 닫은 ${open}개를 **${buffer}**로 이월했습니다:"$'\n'"${carried}"
+          elif [ "$open" -gt 0 ]; then
+            carry_line="버퍼 주에도 남은 이슈가 ${open}개입니다. 범위를 줄일 항목을 정하세요:"$'\n'"${carried}"
+          else
+            carry_line="🎉 이번 주 이슈를 전부 닫았습니다."
+          fi
+
+          gh api -X PATCH "repos/$REPO/milestones/$num" -f state=closed >/dev/null
+
+          # 다음 주 미리보기
+          next=$(gh api "repos/$REPO/milestones?state=open&sort=due_on&direction=asc&per_page=100" \
+                 | jq -r --arg now "$now" '[.[] | select(.due_on != null and .due_on >= $now)][0].title // empty')
+          next_line=""
+          if [ -n "$next" ]; then
+            next_list=$(gh issue list --repo "$REPO" --milestone "$next" --state open --json number,title \
+                        --jq '.[] | "- [ ] #\(.number) \(.title)"')
+            next_line="**다음 주: ${next}**"$'\n'"${next_list}"
+          fi
+
+          body="@${OWNER} **주간 리포트 · ${title}**"$'\n\n'"${bar} ${pct}% (${closed}/${total})"$'\n\n'"${carry_line}"$'\n\n'"${next_line}"$'\n\n'"회고 3줄: 잘된 것 / 막힌 것 / 다음 주에 바꿀 것 을 이 댓글에 답글로 남기세요."
+          gh issue comment "$log" --repo "$REPO" --body "$body"
