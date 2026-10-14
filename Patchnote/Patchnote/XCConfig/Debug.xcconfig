@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  Patchnote
+//
+//  Created by 이창현 on 10/1/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+ITUNES_BASE_URL = https:/$()/itunes.apple.com
