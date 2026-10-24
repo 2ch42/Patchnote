@@ -3,7 +3,7 @@
   "milestones": [
     {
       "title": "W1 · 앱 v1 + 테스트",
-      "due": "2026-10-09",
+      "due": "2026-10-30",
       "issues": [
         { "title": "앱 v1 완성 (검색 → 상세 → 워치리스트, 평소 MVVM 방식)", "body": "ViewModel 안에서 네트워크 서비스를 직접 생성한다. 코드는 전부 설명할 수 있어야 한다." },
         { "title": "Swift Testing 순수 로직 테스트 10개 이상", "body": "평점·날짜 포맷, 정렬, DTO 디코딩. 파라미터화 테스트 1개 이상 포함." },
@@ -14,7 +14,7 @@
     },
     {
       "title": "W2 · 클린 아키텍처",
-      "due": "2026-10-16",
+      "due": "2026-11-06",
       "issues": [
         { "title": "네트워크 서비스 protocol 추상화 + init 주입", "body": "" },
         { "title": "Fake로 ViewModel 테스트 (성공 / 실패 / 빈 결과)", "body": "" },
@@ -25,7 +25,7 @@
     },
     {
       "title": "W3 · TCA ①",
-      "due": "2026-10-23",
+      "due": "2026-11-13",
       "issues": [
         { "title": "TCA 버전 고정 + 공식 튜토리얼 완주", "body": "Meet the Composable Architecture. 고정한 버전을 로드맵 5장 튜터 프롬프트에 적는다." },
         { "title": "워치리스트 기능 TCA 이식 (@Dependency)", "body": "W2의 protocol 주입이 @Dependency로 어떻게 바뀌는지 PR 설명에 적는다." },
@@ -34,7 +34,7 @@
     },
     {
       "title": "W4 · TCA ② + Tuist",
-      "due": "2026-10-30",
+      "due": "2026-11-20",
       "issues": [
         { "title": "StackState 네비게이션 + 전체 화면 TCA 전환", "body": "" },
         { "title": "Tuist 모듈 분리 (App / Feature×3 / Core)", "body": "완료 기준: tuist generate 한 번으로 빌드된다." },
@@ -45,7 +45,7 @@
     },
     {
       "title": "W5 · UIKit",
-      "due": "2026-11-06",
+      "due": "2026-11-27",
       "issues": [
         { "title": "생명주기 · 코드 Auto Layout · UINavigationController", "body": "" },
         { "title": "Representable / UIHostingController 양방향 연동", "body": "" },
@@ -55,7 +55,7 @@
     },
     {
       "title": "W6 · RxSwift + ReactorKit",
-      "due": "2026-11-13",
+      "due": "2026-12-04",
       "issues": [
         { "title": "RxSwift 핵심 연산자 · UI 바인딩", "body": "" },
         { "title": "UIKit 목록 화면 ReactorKit 바인딩", "body": "밀리면: 직접 구현 대신 ReactorKit Examples 코드 읽기로 대체." },
@@ -66,7 +66,7 @@
     },
     {
       "title": "W7 · Fastlane + CI + Sentry",
-      "due": "2026-11-20",
+      "due": "2026-12-11",
       "issues": [
         { "title": "Fastlane match + beta lane → TestFlight", "body": "완료 기준: fastlane beta 한 줄로 업로드." },
         { "title": "PR 자동 테스트 CI (ci.yml)", "body": "" },
@@ -77,7 +77,7 @@
     },
     {
       "title": "W8 · 버퍼 + 면접 대비",
-      "due": "2026-11-27",
+      "due": "2026-12-18",
       "issues": [
         { "title": "면접 답변 정리", "body": "아키텍처 비교, 테스트 전략, 메모리 관리, Swift Concurrency, SwiftUI 상태 관리." },
         { "title": "README 최종 + 이력서 기술 스택 갱신", "body": "" },
