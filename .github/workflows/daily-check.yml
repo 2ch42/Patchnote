@@ -22,16 +22,18 @@ jobs:
       - name: Post daily status
         run: |
           set -euo pipefail
-          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          today=$(TZ=Asia/Seoul date +%Y-%m-%d)
           since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
           weekday=$(TZ=Asia/Seoul date +%u)   # 1=월 ... 5=금
 
           log=$(gh issue list --repo "$REPO" --label daily-log --state open --json number --jq '.[0].number // empty')
           if [ -z "$log" ]; then echo "진행 로그 이슈가 없습니다. Roadmap setup을 먼저 실행하세요."; exit 0; fi
 
-          # 이번 주 Milestone = 마감이 아직 안 지난 것 중 가장 가까운 것
+          # 이번 주 Milestone = 마감일이 오늘(KST) 이후인 것 중 가장 가까운 것
+          # GitHub은 마감을 날짜만 저장해 그날 00:00 UTC(= 09:00 KST)로 돌려준다.
+          # 시각으로 비교하면 금요일 아침 점검 때 이번 주가 이미 지난 것으로 잡혀서 날짜로 비교한다.
           ms=$(gh api "repos/$REPO/milestones?state=open&sort=due_on&direction=asc&per_page=100" \
-               | jq -c --arg now "$now" '[.[] | select(.due_on != null and .due_on >= $now)][0]')
+               | jq -c --arg today "$today" '[.[] | select(.due_on != null and .due_on[0:10] >= $today)][0]')
           if [ "$ms" = "null" ]; then echo "진행 중인 Milestone 없음"; exit 0; fi
 
           title=$(jq -r '.title' <<<"$ms")
@@ -39,7 +41,9 @@ jobs:
           open=$(jq -r '.open_issues' <<<"$ms")
           closed=$(jq -r '.closed_issues' <<<"$ms")
           total=$((open + closed))
-          days_left=$(( ( $(date -d "$due" +%s) - $(date +%s) ) / 86400 ))
+          # 날짜끼리 빼서 남은 날을 센다 (금요일 = 0 → "오늘 마감")
+          days_left=$(( ( $(date -d "${due:0:10}" +%s) - $(date -d "$today" +%s) ) / 86400 ))
+          if [ "$days_left" = "0" ]; then due_line="오늘 마감"; else due_line="마감까지 ${days_left}일"; fi
 
           # 모든 브랜치의 푸시를 센다 (Events API)
           pushes=$(gh api "repos/$REPO/events?per_page=100" \
@@ -60,7 +64,7 @@ jobs:
           body=$(cat <<EOF
           @${OWNER} **$(TZ=Asia/Seoul date +'%m/%d (%a)') 아침 점검**
 
-          **${title}** · ${closed}/${total} 완료 · 마감까지 ${days_left}일
+          **${title}** · ${closed}/${total} 완료 · ${due_line}
 
           ${push_line}
 
