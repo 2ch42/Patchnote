@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Tuist (4주차 이후)
+Derived/
+*.xcworkspace/xcuserdata/
+
+# Fastlane (7주차 이후)
+fastlane/report.xml
+fastlane/test_output/
+fastlane/README.md
