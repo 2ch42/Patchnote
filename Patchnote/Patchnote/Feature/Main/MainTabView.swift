@@ -14,10 +14,7 @@ struct MainTabView: View {
                 SearchView()
             }
             Tab("워치리스트", systemImage: "bookmark") {
-                NavigationStack {
-                    ContentUnavailableView("준비 중이에요", systemImage: "bookmark")
-                        .navigationTitle("워치리스트")
-                }
+                WatchlistView()
             }
         }
     }
