@@ -31,7 +31,11 @@ struct SearchView: View {
             ContentUnavailableView("불러오지 못했어요", systemImage: "wifi.exclamationmark", description: Text(message))
         case .loaded(let items):
             List(items) { item in
-                SearchResultRow(item: item)
+                NavigationLink {
+                    AppDetailView(trackId: item.trackId)
+                } label: {
+                    SearchResultRow(item: item)
+                }
             }
             .listStyle(.insetGrouped)
         }
